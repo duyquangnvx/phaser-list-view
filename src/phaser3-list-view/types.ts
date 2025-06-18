@@ -14,6 +14,11 @@ export interface ListViewOptions {
 	scrollBarAlpha?: number;
 	scrollBarThickness?: number;
 	scrollBarBorderRadius?: number;
+	align?: 'start' | 'center' | 'end';
+	contentAlign?: 'start' | 'center' | 'end';
+	itemSpacing?: number;
+	uniformWidth?: number;
+	uniformHeight?: number;
 }
 
 export interface ScrollBarThumbData {
@@ -84,4 +89,5 @@ export interface DisplayObject extends Phaser.GameObjects.GameObject {
 	visible: boolean;
 	nominalWidth?: number;
 	nominalHeight?: number;
+	setDisplaySize?: (width: number, height: number) => DisplayObject;
 } 

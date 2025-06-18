@@ -13,6 +13,9 @@ export class Game extends Scene
     private wheelEnabled: boolean = true;
     private scrollBarEnabled: boolean = true;
     private itemCount: number = 15;
+    private currentAlign: 'start' | 'center' | 'end' = 'start';
+    private currentContentAlign: 'start' | 'center' | 'end' = 'start';
+    private uniformSizes: boolean = false;
     
     constructor ()
     {
@@ -75,7 +78,9 @@ export class Game extends Scene
                 scrollBarColor: 0x777777,
                 scrollBarAlpha: 0.8,
                 scrollBarThickness: 10,
-                scrollBarBorderRadius: 5
+                scrollBarBorderRadius: 5,
+                align: this.currentAlign,
+                contentAlign: this.currentContentAlign
             }
         );
         
@@ -94,6 +99,9 @@ export class Game extends Scene
         
         // Create content manipulation controls
         this.createContentControls();
+        
+        // Create alignment controls
+        this.createAlignmentControls();
     }
     
     /**
@@ -191,6 +199,163 @@ export class Game extends Scene
             toggleText.setText(this.scrollBarEnabled ? 'Scrollbar: ON' : 'Scrollbar: OFF');
             this.listView.enableScrollBar(this.scrollBarEnabled);
         });
+    }
+    
+    /**
+     * Create alignment control buttons
+     */
+    createAlignmentControls(): void {
+        // Main alignment controls (start, center, end)
+        const alignTitle = this.add.text(650, 450, 'Main Align:', {
+            fontSize: '16px',
+            color: '#ffffff'
+        }).setOrigin(0, 0.5);
+        
+        // Start align button
+        const alignStartBtn = this.add.rectangle(750, 450, 80, 30, this.currentAlign === 'start' ? 0x00aa00 : 0x444444, 0.8);
+        alignStartBtn.setInteractive();
+        
+        const alignStartText = this.add.text(750, 450, 'Start', {
+            fontSize: '14px',
+            color: '#ffffff'
+        }).setOrigin(0.5);
+        
+        alignStartBtn.on('pointerdown', () => {
+            this.setAlignment('start');
+            alignStartBtn.fillColor = 0x00aa00;
+            alignCenterBtn.fillColor = 0x444444;
+            alignEndBtn.fillColor = 0x444444;
+        });
+        
+        // Center align button
+        const alignCenterBtn = this.add.rectangle(840, 450, 80, 30, this.currentAlign === 'center' ? 0x00aa00 : 0x444444, 0.8);
+        alignCenterBtn.setInteractive();
+        
+        const alignCenterText = this.add.text(840, 450, 'Center', {
+            fontSize: '14px',
+            color: '#ffffff'
+        }).setOrigin(0.5);
+        
+        alignCenterBtn.on('pointerdown', () => {
+            this.setAlignment('center');
+            alignStartBtn.fillColor = 0x444444;
+            alignCenterBtn.fillColor = 0x00aa00;
+            alignEndBtn.fillColor = 0x444444;
+        });
+        
+        // End align button
+        const alignEndBtn = this.add.rectangle(930, 450, 80, 30, this.currentAlign === 'end' ? 0x00aa00 : 0x444444, 0.8);
+        alignEndBtn.setInteractive();
+        
+        const alignEndText = this.add.text(930, 450, 'End', {
+            fontSize: '14px',
+            color: '#ffffff'
+        }).setOrigin(0.5);
+        
+        alignEndBtn.on('pointerdown', () => {
+            this.setAlignment('end');
+            alignStartBtn.fillColor = 0x444444;
+            alignCenterBtn.fillColor = 0x444444;
+            alignEndBtn.fillColor = 0x00aa00;
+        });
+        
+        // Cross alignment controls (for content)
+        const contentAlignTitle = this.add.text(650, 490, 'Cross Align:', {
+            fontSize: '16px',
+            color: '#ffffff'
+        }).setOrigin(0, 0.5);
+        
+        // Content start align button
+        const contentAlignStartBtn = this.add.rectangle(750, 490, 80, 30, this.currentContentAlign === 'start' ? 0x00aa00 : 0x444444, 0.8);
+        contentAlignStartBtn.setInteractive();
+        
+        const contentAlignStartText = this.add.text(750, 490, 'Start', {
+            fontSize: '14px',
+            color: '#ffffff'
+        }).setOrigin(0.5);
+        
+        contentAlignStartBtn.on('pointerdown', () => {
+            this.setContentAlignment('start');
+            contentAlignStartBtn.fillColor = 0x00aa00;
+            contentAlignCenterBtn.fillColor = 0x444444;
+            contentAlignEndBtn.fillColor = 0x444444;
+        });
+        
+        // Content center align button
+        const contentAlignCenterBtn = this.add.rectangle(840, 490, 80, 30, this.currentContentAlign === 'center' ? 0x00aa00 : 0x444444, 0.8);
+        contentAlignCenterBtn.setInteractive();
+        
+        const contentAlignCenterText = this.add.text(840, 490, 'Center', {
+            fontSize: '14px',
+            color: '#ffffff'
+        }).setOrigin(0.5);
+        
+        contentAlignCenterBtn.on('pointerdown', () => {
+            this.setContentAlignment('center');
+            contentAlignStartBtn.fillColor = 0x444444;
+            contentAlignCenterBtn.fillColor = 0x00aa00;
+            contentAlignEndBtn.fillColor = 0x444444;
+        });
+        
+        // Content end align button
+        const contentAlignEndBtn = this.add.rectangle(930, 490, 80, 30, this.currentContentAlign === 'end' ? 0x00aa00 : 0x444444, 0.8);
+        contentAlignEndBtn.setInteractive();
+        
+        const contentAlignEndText = this.add.text(930, 490, 'End', {
+            fontSize: '14px',
+            color: '#ffffff'
+        }).setOrigin(0.5);
+        
+        contentAlignEndBtn.on('pointerdown', () => {
+            this.setContentAlignment('end');
+            contentAlignStartBtn.fillColor = 0x444444;
+            contentAlignCenterBtn.fillColor = 0x444444;
+            contentAlignEndBtn.fillColor = 0x00aa00;
+        });
+        
+        // Toggle for uniform sizing
+        const uniformSizeBtn = this.add.rectangle(750, 530, 160, 30, this.uniformSizes ? 0x00aa00 : 0x444444, 0.8);
+        uniformSizeBtn.setInteractive();
+        
+        const uniformSizeText = this.add.text(750, 530, 'Uniform Sizes', {
+            fontSize: '14px',
+            color: '#ffffff'
+        }).setOrigin(0.5);
+        
+        uniformSizeBtn.on('pointerdown', () => {
+            this.uniformSizes = !this.uniformSizes;
+            uniformSizeBtn.fillColor = this.uniformSizes ? 0x00aa00 : 0x444444;
+            
+            // Set uniform sizes
+            if (this.uniformSizes) {
+                this.listView.setUniformWidth(350);
+                this.listView.setUniformHeight(60);
+            } else {
+                this.listView.setUniformWidth(undefined);
+                this.listView.setUniformHeight(undefined);
+            }
+            
+            // Re-layout items
+            this.listView.relayout();
+        });
+    }
+    
+    /**
+     * Set main alignment (start, center, end)
+     */
+    setAlignment(align: 'start' | 'center' | 'end'): void {
+        this.currentAlign = align;
+        this.listView.setAlign(align);
+        this.listView.relayout();
+    }
+    
+    /**
+     * Set content alignment (along cross axis)
+     */
+    setContentAlignment(align: 'start' | 'center' | 'end'): void {
+        this.currentContentAlign = align;
+        this.listView.setContentAlign(align);
+        this.listView.relayout();
     }
     
     /**

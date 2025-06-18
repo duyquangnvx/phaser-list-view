@@ -7,7 +7,10 @@ const defaultOptions: ListViewOptions = {
 	autocull: true,
 	padding: 10,
 	mouseWheel: false,
-	wheelFactor: 0.5
+	wheelFactor: 0.5,
+	align: 'start',
+	contentAlign: 'start',
+	itemSpacing: undefined // Sẽ sử dụng padding nếu không được set
 };
 
 export default class ListViewCore {
@@ -108,12 +111,46 @@ export default class ListViewCore {
 	add(child: DisplayObject): DisplayObject {
 		this.items.push(child);
 		
+		// Áp dụng kích thước đồng nhất nếu được cấu hình
+		if (this.o.uniformWidth !== undefined) {
+			// Chiều rộng đồng nhất
+			if (child.setDisplaySize) {
+				child.setDisplaySize(this.o.uniformWidth, child.height);
+			} else {
+				child.width = this.o.uniformWidth;
+			}
+		}
+		
+		if (this.o.uniformHeight !== undefined) {
+			// Chiều cao đồng nhất
+			if (child.setDisplaySize) {
+				child.setDisplaySize(child.width, this.o.uniformHeight);
+			} else {
+				child.height = this.o.uniformHeight;
+			}
+		}
+		
 		// Calculate position for the new item
 		let xy = 0;
 		
 		if (this.grp.length > 0) {
 			const lastChild = this.grp.getAt(this.grp.length - 1) as DisplayObject;
-			xy = lastChild[this.p.xy] + getWidthOrHeight(lastChild, this.p.wh) + this.o.padding!;
+			// Sử dụng itemSpacing nếu được set, ngược lại sử dụng padding
+			const spacing = this.o.itemSpacing !== undefined ? this.o.itemSpacing : this.o.padding!;
+			xy = lastChild[this.p.xy] + getWidthOrHeight(lastChild, this.p.wh) + spacing;
+		}
+		
+		// Apply contentAlign (căn chỉnh trên trục phụ)
+		const otherAxis = this.p.xy === 'x' ? 'y' : 'x';
+		const otherSize = this.p.wh === 'width' ? 'height' : 'width';
+		
+		if (this.o.contentAlign === 'center') {
+			child[otherAxis] = (this.bounds[otherSize] - getWidthOrHeight(child, otherSize)) / 2;
+		} else if (this.o.contentAlign === 'end') {
+			child[otherAxis] = this.bounds[otherSize] - getWidthOrHeight(child, otherSize);
+		} else {
+			// 'start' là mặc định
+			child[otherAxis] = 0;
 		}
 		
 		// Set position and add to group
@@ -121,12 +158,111 @@ export default class ListViewCore {
 		this.grp.add(child);
 		
 		// Calculate total length
-		this.length = xy + child[this.p.wh];
+		this.length = xy + getWidthOrHeight(child, this.p.wh);
+		
+		// Apply align for all items if needed
+		if (this.o.align !== 'start') {
+			this.applyAlignment();
+		}
 		
 		// Dispatch onAdded event
 		this.events.onAdded.emit('added', this.length - this.bounds[this.p.wh]);
 		
 		return child;
+	}
+	
+	/**
+	 * Apply alignment to all items based on the current alignment option
+	 */
+	applyAlignment(): void {
+		// Skip if alignment isn't needed or there are no items
+		if (this.o.align === 'start' || this.items.length === 0) return;
+		
+		// Calculate available space after all items
+		const availableSpace = this.bounds[this.p.wh] - this.length;
+		
+		// Skip if items take up more space than bounds
+		if (availableSpace <= 0) return;
+		
+		if (this.o.align === 'center') {
+			// Center alignment - move all items by half the available space
+			const offset = availableSpace / 2;
+			for (let i = 0; i < this.items.length; i++) {
+				this.items[i][this.p.xy] += offset;
+			}
+		} else if (this.o.align === 'end') {
+			// End alignment - move all items to the end
+			for (let i = 0; i < this.items.length; i++) {
+				this.items[i][this.p.xy] += availableSpace;
+			}
+		}
+	}
+	
+	/**
+	 * Recalculate item positions with current options
+	 * Call this after changing alignment options
+	 */
+	relayout(): void {
+		// Skip if no items
+		if (this.items.length === 0) return;
+		
+		let position = 0;
+		const spacing = this.o.itemSpacing !== undefined ? this.o.itemSpacing : this.o.padding!;
+		
+		// Position each item sequentially
+		for (let i = 0; i < this.items.length; i++) {
+			const child = this.items[i];
+			
+			// Apply uniform sizes if set
+			if (this.o.uniformWidth !== undefined) {
+				if (child.setDisplaySize) {
+					child.setDisplaySize(this.o.uniformWidth, child.height);
+				} else {
+					child.width = this.o.uniformWidth;
+				}
+			}
+			
+			if (this.o.uniformHeight !== undefined) {
+				if (child.setDisplaySize) {
+					child.setDisplaySize(child.width, this.o.uniformHeight);
+				} else {
+					child.height = this.o.uniformHeight;
+				}
+			}
+			
+			// Apply contentAlign (trục phụ)
+			const otherAxis = this.p.xy === 'x' ? 'y' : 'x';
+			const otherSize = this.p.wh === 'width' ? 'height' : 'width';
+			
+			if (this.o.contentAlign === 'center') {
+				child[otherAxis] = (this.bounds[otherSize] - getWidthOrHeight(child, otherSize)) / 2;
+			} else if (this.o.contentAlign === 'end') {
+				child[otherAxis] = this.bounds[otherSize] - getWidthOrHeight(child, otherSize);
+			} else {
+				// 'start' là mặc định
+				child[otherAxis] = 0;
+			}
+			
+			// Position on main axis
+			child[this.p.xy] = position;
+			position += getWidthOrHeight(child, this.p.wh) + spacing;
+		}
+		
+		// Update total length
+		if (this.items.length > 0) {
+			const lastChild = this.items[this.items.length - 1];
+			this.length = lastChild[this.p.xy] + getWidthOrHeight(lastChild, this.p.wh);
+		} else {
+			this.length = 0;
+		}
+		
+		// Apply alignment if needed
+		if (this.o.align !== 'start') {
+			this.applyAlignment();
+		}
+		
+		// Notify listeners about content change
+		this.events.onAdded.emit('added', this.length - this.bounds[this.p.wh]);
 	}
 	
 	/**

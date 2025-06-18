@@ -662,4 +662,102 @@ export default class ListView extends ListViewCore {
 			1 - ((position - info.min) / (info.max - info.min))
 		));
 	}
+	
+	/**
+	 * Set option value
+	 * @param key Option key
+	 * @param value Option value
+	 */
+	setOption(key: string, value: any): void {
+		if (this.o && key in this.o) {
+			(this.o as any)[key] = value;
+		}
+	}
+	
+	/**
+	 * Get option value
+	 * @param key Option key
+	 * @returns Option value or undefined
+	 */
+	getOption(key: string): any {
+		if (this.o && key in this.o) {
+			return (this.o as any)[key];
+		}
+		return undefined;
+	}
+	
+	/**
+	 * Set main axis alignment
+	 * @param align Alignment value: 'start', 'center', or 'end'
+	 */
+	setAlign(align: 'start' | 'center' | 'end'): void {
+		this.setOption('align', align);
+	}
+	
+	/**
+	 * Get main axis alignment
+	 */
+	getAlign(): 'start' | 'center' | 'end' {
+		return this.getOption('align') || 'start';
+	}
+	
+	/**
+	 * Set cross axis alignment for content
+	 * @param align Alignment value: 'start', 'center', or 'end'
+	 */
+	setContentAlign(align: 'start' | 'center' | 'end'): void {
+		this.setOption('contentAlign', align);
+	}
+	
+	/**
+	 * Get cross axis alignment for content
+	 */
+	getContentAlign(): 'start' | 'center' | 'end' {
+		return this.getOption('contentAlign') || 'start';
+	}
+	
+	/**
+	 * Set uniform width for all items
+	 * @param width Width value or undefined to use original sizes
+	 */
+	setUniformWidth(width?: number): void {
+		this.setOption('uniformWidth', width);
+	}
+	
+	/**
+	 * Set uniform height for all items
+	 * @param height Height value or undefined to use original sizes
+	 */
+	setUniformHeight(height?: number): void {
+		this.setOption('uniformHeight', height);
+	}
+	
+	/**
+	 * Get uniform width value
+	 */
+	getUniformWidth(): number | undefined {
+		return this.getOption('uniformWidth');
+	}
+	
+	/**
+	 * Get uniform height value
+	 */
+	getUniformHeight(): number | undefined {
+		return this.getOption('uniformHeight');
+	}
+	
+	/**
+	 * Set spacing between items
+	 * @param spacing Spacing value or undefined to use padding
+	 */
+	setItemSpacing(spacing?: number): void {
+		this.setOption('itemSpacing', spacing);
+	}
+	
+	/**
+	 * Get spacing between items
+	 */
+	getItemSpacing(): number | undefined {
+		return this.getOption('itemSpacing');
+	}
 } 
