@@ -92,6 +92,11 @@ export function dispatchClicks(
 	
 	// Find object under point since Phaser doesn't support click propagation
 	const found = findChild(clickables, clickable => {
+		// Bỏ qua các đối tượng không có input hoặc input không được bật
+		if (!(clickable as any).input || !(clickable as any).input.enabled) {
+			return false;
+		}
+
 		// Get the world position of the clickable
 		const worldPosition = (clickable as any).getWorldTransformMatrix 
 			? (clickable as any).getWorldTransformMatrix()
@@ -105,11 +110,10 @@ export function dispatchClicks(
 		const height = (clickable as any).height || 0;
 		const rect = new Phaser.Geom.Rectangle(x, y, width, height);
 		
-		return (clickable as any).input && 
-			   (clickable as any).input.enabled && 
-			   Phaser.Geom.Rectangle.Contains(rect, pointer.x, pointer.y);
+		return Phaser.Geom.Rectangle.Contains(rect, pointer.x, pointer.y);
 	});
 	
+	// Chỉ emit sự kiện nếu tìm thấy đối tượng và đối tượng có phương thức emit
 	if (found && (found as any).emit) {
 		(found as any).emit(eventType, found, pointer, true);
 	}

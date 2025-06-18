@@ -6,7 +6,6 @@ export interface ListViewOptions {
 	snapping?: boolean;
 	overflow?: number;
 	padding?: number;
-	searchForClicks?: boolean;
 	mouseWheel?: boolean;
 	wheelFactor?: number;
 	scrollBar?: boolean;

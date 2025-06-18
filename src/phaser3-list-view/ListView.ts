@@ -12,7 +12,6 @@ const defaultOptions: ListViewOptions = {
 	snapping: false,
 	overflow: 100,
 	padding: 10,
-	searchForClicks: false,
 	mouseWheel: true,
 	wheelFactor: 0.5,
 	scrollBar: true,
@@ -31,8 +30,8 @@ export default class ListView extends ListViewCore {
 	protected scrollBarTrack: Phaser.GameObjects.Graphics;
 	protected scrollBarThumb: Phaser.GameObjects.Graphics;
 	protected scrollBarData: ScrollBarThumbData;
-	protected _batchAdding: boolean = false;
-	protected _pendingPosition: number | undefined;
+	protected batchAdding: boolean = false;
+	protected pendingPosition: number | undefined;
 	
 	constructor(
 		game: Phaser.Scene,
@@ -48,15 +47,15 @@ export default class ListView extends ListViewCore {
 		);
 		
 		// Create a zone for interaction
-		const zone = this.game.add.zone(bounds.x, bounds.y, bounds.width, bounds.height);
-		zone.setOrigin(0, 0);
-		zone.setInteractive();
-		parent.add(zone);
+		const container = this.game.add.zone(bounds.x, bounds.y, bounds.width, bounds.height);
+		container.setOrigin(0, 0);
+		container.disableInteractive();
+		parent.add(container);
 		
 		// Create the scroller with same bounds as the list
 		this.scroller = new DirectionalScroller(
 			this.game,
-			zone,
+			container,
 			Object.assign(
 				{
 					from: 0,
@@ -67,8 +66,9 @@ export default class ListView extends ListViewCore {
 		);
 		
 		// Listen for scroll updates
-		this.scroller.events.onUpdate.addListener('update', (data: any) => {
-			this._setPosition(data.total);
+		const { onUpdate } = this.scroller.getEvents();
+		onUpdate.addListener('update', (data: any) => {
+			this.setScrollPosition(data.total);
 			
 			if (this.scrollBarEnabled) {
 				this.updateScrollBarPosition(data.percent);
@@ -84,10 +84,6 @@ export default class ListView extends ListViewCore {
 			// Update scroller bounds
 			const to = Math.min(-limit, 0);
 			this.scroller.setFromTo(0, to);
-			
-			if (this.options.searchForClicks) {
-				this.scroller.registerClickables(this.items);
-			}
 			
 			// Create or update scrollbar when content changes
 			if (this.scrollBarEnabled) {
@@ -110,7 +106,7 @@ export default class ListView extends ListViewCore {
 		// Setup mouse wheel support if enabled
 		this.wheelEnabled = this.options.mouseWheel || false;
 		if (this.wheelEnabled) {
-			this.setupWheelInput(zone);
+			this.setupWheelInput(container);
 		}
 		
 		// Setup scrollbar if enabled
@@ -128,7 +124,7 @@ export default class ListView extends ListViewCore {
 		let wheelAcceleration = 1;
 		
 		// Attach wheel event listener to the game canvas
-		this.game.input.on('wheel', (pointer: Phaser.Input.Pointer, gameObjects: any[], deltaX: number, deltaY: number) => {
+		this.game.input.on(Phaser.Input.Events.POINTER_WHEEL, (pointer: Phaser.Input.Pointer, gameObjects: any[], deltaX: number, deltaY: number) => {
 			// Skip if wheel is not enabled
 			if (!this.wheelEnabled) return;
 			
@@ -258,7 +254,7 @@ export default class ListView extends ListViewCore {
 	protected initScrollBarInteraction(): void {
 		if (!this.scrollBarThumb) return;
 		
-		this.scrollBarThumb.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+		this.scrollBarThumb.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
 			// Stop any ongoing scrolling
 			if (this.scroller) {
 				this.scroller.cancel();
@@ -293,9 +289,9 @@ export default class ListView extends ListViewCore {
 			
 			// Add up/out handler to clean up
 			const upHandler = () => {
-				this.game.input.off('pointermove', moveHandler);
-				this.game.input.off('pointerup', upHandler);
-				this.game.input.off('pointerout', upHandler);
+				this.game.input.off(Phaser.Input.Events.POINTER_MOVE, moveHandler);
+				this.game.input.off(Phaser.Input.Events.POINTER_UP, upHandler);
+				this.game.input.off(Phaser.Input.Events.POINTER_OUT, upHandler);
 				
 				// Re-enable scroller's own interactions
 				if (this.scroller) {
@@ -309,16 +305,16 @@ export default class ListView extends ListViewCore {
 			}
 			
 			// Setup event handlers
-			this.game.input.on('pointermove', moveHandler);
-			this.game.input.on('pointerup', upHandler);
-			this.game.input.on('pointerout', upHandler);
+			this.game.input.on(Phaser.Input.Events.POINTER_MOVE, moveHandler);
+			this.game.input.on(Phaser.Input.Events.POINTER_UP, upHandler);
+			this.game.input.on(Phaser.Input.Events.POINTER_OUT, upHandler);
 		});
 		
 		// Also make track clickable to jump to position
 		this.scrollBarTrack.setInteractive(new Phaser.Geom.Rectangle(0, 0, 1, 1),
 			Phaser.Geom.Rectangle.Contains);
 			
-		this.scrollBarTrack.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+		this.scrollBarTrack.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
 			if (!this.scrollBarData || !this.scroller) return;
 			
 			// Get click position relative to track
@@ -536,7 +532,7 @@ export default class ListView extends ListViewCore {
 	 */
 	destroy(): void {
 		if (this.wheelEnabled) {
-			this.game.input.off('wheel');
+			this.game.input.off(Phaser.Input.Events.POINTER_WHEEL);
 		}
 		
 		if (this.wheelEventTimer) {
@@ -567,7 +563,7 @@ export default class ListView extends ListViewCore {
 	 * Reset the list and scroller to initial position
 	 */
 	reset(): void {
-		this._setPosition(0);
+		this.setScrollPosition(0);
 		this.scroller.reset();
 	}
 	
@@ -597,13 +593,13 @@ export default class ListView extends ListViewCore {
 	 */
 	addMultiple(...children: DisplayObject[]): void {
 		// Use a temporary flag to prevent scrolling reset during batch adds
-		this._batchAdding = true;
+		this.batchAdding = true;
 		
 		// Add all items
 		children.forEach((child, index) => {
 			if (index === children.length - 1) {
 				// Last item, reset batch flag
-				this._batchAdding = false;
+				this.batchAdding = false;
 			}
 			this.add(child);
 		});
@@ -627,12 +623,12 @@ export default class ListView extends ListViewCore {
 	}
 	
 	/**
-	 * Override parent's _setPosition to handle batch operations
+	 * Override parent's setScrollPosition to handle batch operations
 	 */
-	_setPosition(position: number): void {
+	setScrollPosition(position: number): void {
 		// If we're batch adding, only update thumb position but don't
 		// move the list until the batch is complete
-		if (this._batchAdding) {
+		if (this.batchAdding) {
 			// Update thumb position only if we need to
 			if (this.scrollBarEnabled && this.scrollBarThumb) {
 				const percent = this.calculateScrollPercent(position);
@@ -640,13 +636,13 @@ export default class ListView extends ListViewCore {
 			}
 			
 			// Store position for later application
-			this._pendingPosition = position;
+			this.pendingPosition = position;
 		} else {
 			// Apply position normally using parent implementation
-			super._setPosition(position);
+			super.setScrollPosition(position);
 			
 			// Clear any pending position
-			this._pendingPosition = undefined;
+			this.pendingPosition = undefined;
 		}
 	}
 	

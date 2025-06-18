@@ -156,3 +156,73 @@ Created by [Phaser Studio](mailto:support@phaser.io). Powered by coffee, anime, 
 The Phaser logo and characters are &copy; 2011 - 2025 Phaser Studio Inc.
 
 All rights reserved.
+
+## Xử lý sự kiện trong ListView
+
+ListView có hỗ trợ hai cách xử lý sự kiện cho các item con:
+
+### Cách 1: Sử dụng dispatchClicks (Cách truyền thống)
+
+```javascript
+import { dispatchClicks } from 'phaser3-list-view/utils/Util';
+
+// Trong phương thức update hoặc handler của bạn
+function handlePointerUp(pointer) {
+    // Tìm và phát sự kiện cho đối tượng dưới con trỏ
+    dispatchClicks(pointer, this.clickableItems, 'pointerup');
+}
+```
+
+### Cách 2: Sử dụng ScrollerEventDispatcher (Cách mới, khuyến nghị)
+
+```javascript
+import { ScrollerEventDispatcher } from 'phaser3-list-view';
+
+// Trong phương thức create của scene
+create() {
+    // Tạo container cho danh sách các item
+    const container = this.add.container(0, 0);
+    
+    // Khởi tạo EventDispatcher
+    this.eventDispatcher = new ScrollerEventDispatcher(this, container);
+    
+    // Tạo các item con và thêm vào container
+    const items = [
+        this.add.text(10, 10, 'Item 1').setInteractive(),
+        this.add.text(10, 50, 'Item 2').setInteractive(),
+        this.add.text(10, 90, 'Item 3').setInteractive()
+    ];
+    
+    items.forEach(item => {
+        container.add(item);
+        
+        // Đăng ký các sự kiện cho item
+        item.on('pointerdown', () => console.log('Item clicked:', item.text));
+        item.on('pointerover', () => item.setColor('#ff0000'));
+        item.on('pointerout', () => item.setColor('#ffffff'));
+    });
+    
+    // Đăng ký các item với EventDispatcher
+    this.eventDispatcher.registerItems(items);
+    
+    // Tạo ListView sử dụng container
+    this.listView = new ListView(this, {
+        // ... các tùy chọn khác
+        container: container
+    });
+}
+```
+
+Khi sử dụng `ScrollerEventDispatcher`, bạn không cần phải tự xử lý việc phân phát sự kiện, class này sẽ tự động làm điều đó cho bạn. Nó cung cấp các phương thức sau:
+
+- `registerItems(items)`: Đăng ký danh sách các item có thể click
+- `enable()` / `disable()`: Bật/tắt xử lý sự kiện
+- `destroy()`: Dọn dẹp tài nguyên khi không còn sử dụng nữa
+
+ScrollerEventDispatcher tự động xử lý các sự kiện sau cho các item con:
+- pointerdown
+- pointerup
+- pointermove
+- pointerover
+- pointerout
+- click (khi có pointerdown và pointerup trên cùng một item)

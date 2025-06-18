@@ -1,31 +1,30 @@
-import Phaser from 'phaser';
 import Scroller from './Scroller';
 import { ScrollerOptions } from './types';
 
 export default class DirectionalScroller extends Scroller {
 	constructor(
 		game: Phaser.Scene, 
-		clickObject: Phaser.GameObjects.GameObject, 
+		container: Phaser.GameObjects.GameObject, 
 		options: ScrollerOptions = {}
 	) {
 		super(
 			game,
-			clickObject,
+			container,
 			{ 
-				x: (clickObject as any).width, 
-				y: (clickObject as any).height 
+				x: (container as any).width, 
+				y: (container as any).height 
 			},
 			options
 		);
 	}
 
-	handleDown(pointer: Phaser.Input.Pointer): void {
-		this.old = this.down = pointer[this.o.direction === 'x' ? 'x' : 'y'];
-		super.handleDown(pointer);
+	handlePointerDown(pointer: Phaser.Input.Pointer): void {
+		this.old = this.down = pointer[this.options.direction === 'x' ? 'x' : 'y'];
+		super.handlePointerDown(pointer);
 	}
 
-	handleUp(pointer: Phaser.Input.Pointer): void {
-		this.current = pointer[this.o.direction === 'x' ? 'x' : 'y'];
-		super.handleUp(pointer);
+	handlePointerUp(pointer: Phaser.Input.Pointer): void {
+		this.current = pointer[this.options.direction === 'x' ? 'x' : 'y'];
+		super.handlePointerUp(pointer);
 	}
 } 

@@ -63,7 +63,7 @@ export default class ListViewCore {
 		this.createMask();
 		
 		// Add update listener to track container movement
-		this.game.events.on('postupdate', this.updateMaskPosition.bind(this));
+		this.game.events.on(Phaser.Scenes.Events.POST_UPDATE, this.updateMaskPosition.bind(this));
 	}
 	
 	/**
@@ -111,9 +111,9 @@ export default class ListViewCore {
 	add(child: DisplayObject): DisplayObject {
 		this.items.push(child);
 		
-		// Áp dụng kích thước đồng nhất nếu được cấu hình
+		// Apply uniform size if configured
 		if (this.o.uniformWidth !== undefined) {
-			// Chiều rộng đồng nhất
+			// Uniform width
 			if (child.setDisplaySize) {
 				child.setDisplaySize(this.o.uniformWidth, child.height);
 			} else {
@@ -122,7 +122,7 @@ export default class ListViewCore {
 		}
 		
 		if (this.o.uniformHeight !== undefined) {
-			// Chiều cao đồng nhất
+			// Uniform height
 			if (child.setDisplaySize) {
 				child.setDisplaySize(child.width, this.o.uniformHeight);
 			} else {
@@ -135,12 +135,12 @@ export default class ListViewCore {
 		
 		if (this.grp.length > 0) {
 			const lastChild = this.grp.getAt(this.grp.length - 1) as DisplayObject;
-			// Sử dụng itemSpacing nếu được set, ngược lại sử dụng padding
+			// Use itemSpacing if set, otherwise use padding
 			const spacing = this.o.itemSpacing !== undefined ? this.o.itemSpacing : this.o.padding!;
 			xy = lastChild[this.p.xy] + getWidthOrHeight(lastChild, this.p.wh) + spacing;
 		}
 		
-		// Apply contentAlign (căn chỉnh trên trục phụ)
+		// Apply contentAlign (align on secondary axis)
 		const otherAxis = this.p.xy === 'x' ? 'y' : 'x';
 		const otherSize = this.p.wh === 'width' ? 'height' : 'width';
 		
@@ -149,7 +149,7 @@ export default class ListViewCore {
 		} else if (this.o.contentAlign === 'end') {
 			child[otherAxis] = this.bounds[otherSize] - getWidthOrHeight(child, otherSize);
 		} else {
-			// 'start' là mặc định
+			// 'start' is default
 			child[otherAxis] = 0;
 		}
 		
@@ -230,7 +230,7 @@ export default class ListViewCore {
 				}
 			}
 			
-			// Apply contentAlign (trục phụ)
+			// Apply contentAlign (secondary axis)
 			const otherAxis = this.p.xy === 'x' ? 'y' : 'x';
 			const otherSize = this.p.wh === 'width' ? 'height' : 'width';
 			
@@ -239,7 +239,7 @@ export default class ListViewCore {
 			} else if (this.o.contentAlign === 'end') {
 				child[otherAxis] = this.bounds[otherSize] - getWidthOrHeight(child, otherSize);
 			} else {
-				// 'start' là mặc định
+				// 'start' is default
 				child[otherAxis] = 0;
 			}
 			
@@ -295,7 +295,7 @@ export default class ListViewCore {
 			this.events.onAdded.removeAllListeners();
 		}
 		
-		this.game.events.off('postupdate', this.updateMaskPosition.bind(this));
+		this.game.events.off(Phaser.Scenes.Events.POST_UPDATE, this.updateMaskPosition.bind(this));
 
 		// Cleanup mask resources
 		if (this.maskGraphics) {
@@ -364,7 +364,7 @@ export default class ListViewCore {
 		if (this.scroller) {
 			this.scroller.setTo(position);
 		} else {
-			this._setPosition(position);
+			this.setScrollPosition(position);
 		}
 	}
 	
@@ -376,7 +376,7 @@ export default class ListViewCore {
 		if (this.scroller) {
 			this.scroller.setTo(this.getPositionByItemIndex(index));
 		} else {
-			this._setPosition(this.getPositionByItemIndex(index));
+			this.setScrollPosition(this.getPositionByItemIndex(index));
 		}
 	}
 	
@@ -396,7 +396,7 @@ export default class ListViewCore {
 				duration: duration * 1000,
 				ease: 'Quad.easeOut',
 				onUpdate: (tween, target) => {
-					this._setPosition(target.pos);
+					this.setScrollPosition(target.pos);
 				}
 			});
 		}
@@ -415,7 +415,7 @@ export default class ListViewCore {
 	 * @private
 	 * Set the position of the list
 	 */
-	_setPosition(position: number): void {
+	setScrollPosition(position: number): void {
 		this.position = position;
 		this.grp[this.p.xy] = this.bounds[this.p.xy] + position;
 		

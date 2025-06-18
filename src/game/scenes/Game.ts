@@ -1,18 +1,16 @@
 import { Scene } from 'phaser';
-import { ListView, WheelScroller, SwipeCarousel } from '../../phaser3-list-view';
+import { ListView, SwipeCarousel } from '../../phaser3-list-view';
 
 export class Game extends Scene
 {
     private listView: ListView;
-    private wheelScroller: WheelScroller;
     private swipeCarousel: SwipeCarousel;
     private items: Phaser.GameObjects.Container[] = [];
-    private wheelItems: Phaser.GameObjects.Container[] = [];
     private carouselItems: Phaser.GameObjects.Container[] = [];
     private listViewContainer: Phaser.GameObjects.Container;
     private wheelEnabled: boolean = true;
     private scrollBarEnabled: boolean = true;
-    private itemCount: number = 15;
+    private itemCount: number = 2;
     private currentAlign: 'start' | 'center' | 'end' = 'start';
     private currentContentAlign: 'start' | 'center' | 'end' = 'start';
     private uniformSizes: boolean = false;
@@ -111,7 +109,7 @@ export class Game extends Scene
         // Left button
         const moveLeftBtn = this.add.rectangle(600, 300, 80, 40, 0xff0000, 0.8);
         moveLeftBtn.setInteractive();
-        moveLeftBtn.on('pointerdown', () => {
+        moveLeftBtn.on(Phaser.Input.Events.POINTER_DOWN, () => {
             this.tweens.add({
                 targets: this.listViewContainer,
                 x: this.listViewContainer.x - 100,
@@ -128,7 +126,7 @@ export class Game extends Scene
         // Right button
         const moveRightBtn = this.add.rectangle(700, 300, 80, 40, 0x0000ff, 0.8);
         moveRightBtn.setInteractive();
-        moveRightBtn.on('pointerdown', () => {
+        moveRightBtn.on(Phaser.Input.Events.POINTER_DOWN, () => {
             this.tweens.add({
                 targets: this.listViewContainer,
                 x: this.listViewContainer.x + 100,
@@ -145,7 +143,7 @@ export class Game extends Scene
         // Reset position button
         const resetBtn = this.add.rectangle(650, 350, 120, 40, 0x00aa00, 0.8);
         resetBtn.setInteractive();
-        resetBtn.on('pointerdown', () => {
+        resetBtn.on(Phaser.Input.Events.POINTER_DOWN, () => {
             this.tweens.add({
                 targets: this.listViewContainer,
                 x: 100,
@@ -173,7 +171,7 @@ export class Game extends Scene
             color: '#ffffff'
         }).setOrigin(0.5);
         
-        toggleBtn.on('pointerdown', () => {
+        toggleBtn.on(Phaser.Input.Events.POINTER_DOWN, () => {
             this.wheelEnabled = !this.wheelEnabled;
             toggleBtn.fillColor = this.wheelEnabled ? 0x00aa00 : 0xaa0000;
             toggleText.setText(this.wheelEnabled ? 'Wheel: ON' : 'Wheel: OFF');
@@ -193,7 +191,7 @@ export class Game extends Scene
             color: '#ffffff'
         }).setOrigin(0.5);
         
-        toggleBtn.on('pointerdown', () => {
+        toggleBtn.on(Phaser.Input.Events.POINTER_DOWN, () => {
             this.scrollBarEnabled = !this.scrollBarEnabled;
             toggleBtn.fillColor = this.scrollBarEnabled ? 0x00aa00 : 0xaa0000;
             toggleText.setText(this.scrollBarEnabled ? 'Scrollbar: ON' : 'Scrollbar: OFF');
@@ -220,7 +218,7 @@ export class Game extends Scene
             color: '#ffffff'
         }).setOrigin(0.5);
         
-        alignStartBtn.on('pointerdown', () => {
+        alignStartBtn.on(Phaser.Input.Events.POINTER_DOWN, () => {
             this.setAlignment('start');
             alignStartBtn.fillColor = 0x00aa00;
             alignCenterBtn.fillColor = 0x444444;
@@ -236,7 +234,7 @@ export class Game extends Scene
             color: '#ffffff'
         }).setOrigin(0.5);
         
-        alignCenterBtn.on('pointerdown', () => {
+        alignCenterBtn.on(Phaser.Input.Events.POINTER_DOWN, () => {
             this.setAlignment('center');
             alignStartBtn.fillColor = 0x444444;
             alignCenterBtn.fillColor = 0x00aa00;
@@ -252,7 +250,7 @@ export class Game extends Scene
             color: '#ffffff'
         }).setOrigin(0.5);
         
-        alignEndBtn.on('pointerdown', () => {
+        alignEndBtn.on(Phaser.Input.Events.POINTER_DOWN, () => {
             this.setAlignment('end');
             alignStartBtn.fillColor = 0x444444;
             alignCenterBtn.fillColor = 0x444444;
@@ -274,7 +272,7 @@ export class Game extends Scene
             color: '#ffffff'
         }).setOrigin(0.5);
         
-        contentAlignStartBtn.on('pointerdown', () => {
+        contentAlignStartBtn.on(Phaser.Input.Events.POINTER_DOWN, () => {
             this.setContentAlignment('start');
             contentAlignStartBtn.fillColor = 0x00aa00;
             contentAlignCenterBtn.fillColor = 0x444444;
@@ -290,7 +288,7 @@ export class Game extends Scene
             color: '#ffffff'
         }).setOrigin(0.5);
         
-        contentAlignCenterBtn.on('pointerdown', () => {
+        contentAlignCenterBtn.on(Phaser.Input.Events.POINTER_DOWN, () => {
             this.setContentAlignment('center');
             contentAlignStartBtn.fillColor = 0x444444;
             contentAlignCenterBtn.fillColor = 0x00aa00;
@@ -306,7 +304,7 @@ export class Game extends Scene
             color: '#ffffff'
         }).setOrigin(0.5);
         
-        contentAlignEndBtn.on('pointerdown', () => {
+        contentAlignEndBtn.on(Phaser.Input.Events.POINTER_DOWN, () => {
             this.setContentAlignment('end');
             contentAlignStartBtn.fillColor = 0x444444;
             contentAlignCenterBtn.fillColor = 0x444444;
@@ -322,7 +320,7 @@ export class Game extends Scene
             color: '#ffffff'
         }).setOrigin(0.5);
         
-        uniformSizeBtn.on('pointerdown', () => {
+        uniformSizeBtn.on(Phaser.Input.Events.POINTER_DOWN, () => {
             this.uniformSizes = !this.uniformSizes;
             uniformSizeBtn.fillColor = this.uniformSizes ? 0x00aa00 : 0x444444;
             
@@ -371,7 +369,7 @@ export class Game extends Scene
             color: '#ffffff'
         }).setOrigin(0.5);
         
-        addBtn.on('pointerdown', () => {
+        addBtn.on(Phaser.Input.Events.POINTER_DOWN, () => {
             this.itemCount++;
             const newItem = this.createListItems(1)[0];
             this.listView.add(newItem);
@@ -387,7 +385,7 @@ export class Game extends Scene
             color: '#ffffff'
         }).setOrigin(0.5);
         
-        addScrollBtn.on('pointerdown', () => {
+        addScrollBtn.on(Phaser.Input.Events.POINTER_DOWN, () => {
             this.itemCount++;
             const newItem = this.createListItems(1)[0];
             this.listView.add(newItem, true);
@@ -403,7 +401,7 @@ export class Game extends Scene
             color: '#ffffff'
         }).setOrigin(0.5);
         
-        removeBtn.on('pointerdown', () => {
+        removeBtn.on(Phaser.Input.Events.POINTER_DOWN, () => {
             if (this.items.length > 0) {
                 const lastItem = this.items.pop();
                 if (lastItem) {
@@ -423,7 +421,7 @@ export class Game extends Scene
             color: '#ffffff'
         }).setOrigin(0.5);
         
-        resetContentBtn.on('pointerdown', () => {
+        resetContentBtn.on(Phaser.Input.Events.POINTER_DOWN, () => {
             // Remove old items
             this.items.forEach(item => item.destroy());
             this.items = [];
@@ -446,6 +444,9 @@ export class Game extends Scene
      * @param count Number of items to create
      */
     createListItems(count: number): Phaser.GameObjects.Container[] {
+        const itemWidth = 340;
+        const itemHeight = 80;
+
         const items: Phaser.GameObjects.Container[] = [];
         const colors = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff, 0x00ffff];
         
@@ -456,23 +457,49 @@ export class Game extends Scene
             // Create background for the item
             const bg = this.add.graphics();
             bg.fillStyle(colors[i % colors.length], 0.7);
-            bg.fillRoundedRect(0, 0, 380, 80, 10);
+            bg.fillRoundedRect(0, 0, itemWidth, itemHeight, 10);
             
             // Add border for the item
             const border = this.add.graphics();
             border.lineStyle(2, 0xffffff, 0.8);
-            border.strokeRoundedRect(0, 0, 380, 80, 10);
+            border.strokeRoundedRect(0, 0, itemWidth, itemHeight, 10);
             
             // Add text content
-            const text = this.add.text(190, 40, `Item #${i+1}`, {
+            const text = this.add.text(itemWidth / 2, itemHeight / 2, `Item #${i+1}`, {
                 fontFamily: 'Arial',
                 fontSize: 24,
                 color: '#ffffff'
             }).setOrigin(0.5);
+
+
             
             // Add elements to the container
             itemContainer.add([bg, border, text]);
-            itemContainer.setSize(380, 80);
+            itemContainer.setSize(itemWidth, itemHeight);
+
+            itemContainer.setInteractive({
+                hitArea: new Phaser.Geom.Rectangle(itemWidth / 2, itemHeight / 2, itemWidth, itemHeight),
+                hitAreaCallback: Phaser.Geom.Rectangle.Contains
+            });
+            const itemIndex = i + 1;
+            
+            itemContainer.on(Phaser.Input.Events.POINTER_DOWN, (pointer: Phaser.Input.Pointer) => {
+                console.log(`Item #${itemIndex} clicked at position ${pointer.x}, ${pointer.y}`);
+
+            });
+            
+            itemContainer.on(Phaser.Input.Events.POINTER_UP, (pointer: Phaser.Input.Pointer) => {
+                console.log(`Item #${itemIndex} released at position ${pointer.x}, ${pointer.y}`);
+            });
+            
+            itemContainer.on(Phaser.Input.Events.POINTER_MOVE, (pointer: Phaser.Input.Pointer) => {
+                // console.log(`Item #${itemIndex} moved to position ${pointer.x}, ${pointer.y}`);
+            });
+            
+            itemContainer.on(Phaser.Input.Events.POINTER_OUT, (pointer: Phaser.Input.Pointer) => {
+                console.log(`Item #${itemIndex} mouse left`);
+                
+            });
             
             items.push(itemContainer);
         }

@@ -2,7 +2,6 @@ import Scroller from './Scroller';
 import ListView from './ListView';
 import ListViewCore from './ListViewCore';
 import SwipeCarousel from './SwipeCarousel';
-import WheelScroller from './WheelScroller';
 import DirectionalScroller from './DirectionalScroller';
 import ScrollerEventDispatcher from './ScrollerEventDispatcher';
 
@@ -15,7 +14,6 @@ class PhaserListView {
 	static ListView = ListView;
 	static ListViewCore = ListViewCore;
 	static SwipeCarousel = SwipeCarousel;
-	static WheelScroller = WheelScroller;
 	static DirectionalScroller = DirectionalScroller;
 	static ScrollerEventDispatcher = ScrollerEventDispatcher;
 }
@@ -26,7 +24,6 @@ export {
 	ListView,
 	ListViewCore,
 	SwipeCarousel,
-	WheelScroller,
 	DirectionalScroller,
 	ScrollerEventDispatcher
 };
