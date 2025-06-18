@@ -10,6 +10,7 @@ export class Game extends Scene
     private wheelItems: Phaser.GameObjects.Container[] = [];
     private carouselItems: Phaser.GameObjects.Container[] = [];
     private listViewContainer: Phaser.GameObjects.Container;
+    private wheelEnabled: boolean = true;
     
     constructor ()
     {
@@ -65,7 +66,9 @@ export class Game extends Scene
                 bouncing: true,
                 snapping: false,
                 overflow: 140,
-                padding: 10
+                padding: 10,
+                mouseWheel: true,
+                wheelFactor: 0.1
             }
         );
         
@@ -75,6 +78,9 @@ export class Game extends Scene
         
         // Create movement controls
         this.createListViewControls();
+        
+        // Create a toggle for mouse wheel scrolling
+        this.createWheelToggle();
     }
     
     /**
@@ -132,6 +138,26 @@ export class Game extends Scene
             fontSize: '16px',
             color: '#ffffff'
         }).setOrigin(0.5);
+    }
+    
+    /**
+     * Create toggle button for mouse wheel
+     */
+    createWheelToggle() {
+        const toggleBtn = this.add.rectangle(800, 300, 140, 40, this.wheelEnabled ? 0x00aa00 : 0xaa0000, 0.8);
+        toggleBtn.setInteractive();
+        
+        const toggleText = this.add.text(800, 300, this.wheelEnabled ? 'Wheel: ON' : 'Wheel: OFF', {
+            fontSize: '16px',
+            color: '#ffffff'
+        }).setOrigin(0.5);
+        
+        toggleBtn.on('pointerdown', () => {
+            this.wheelEnabled = !this.wheelEnabled;
+            toggleBtn.fillColor = this.wheelEnabled ? 0x00aa00 : 0xaa0000;
+            toggleText.setText(this.wheelEnabled ? 'Wheel: ON' : 'Wheel: OFF');
+            this.listView.enableWheel(this.wheelEnabled);
+        });
     }
     
     /**

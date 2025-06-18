@@ -575,4 +575,67 @@ export default class Scroller {
 		const dir = direction || this.o.direction || 'y';
 		return this.scrollObject[dir];
 	}
+
+	/**
+	 * Apply wheel scroll with momentum and bouncing behaviors
+	 * @param delta Amount to scroll by
+	 * @param acceleration Acceleration factor for momentum (0-2 recommended)
+	 */
+	applyWheelScroll(delta: number, acceleration: number = 1): void {
+		// Cancel any ongoing animations
+		this.cancel();
+		
+		// Get current position
+		const currentPos = this.scrollObject[this.o.direction!];
+		
+		// Calculate target position with acceleration
+		const targetPos = currentPos + delta * acceleration;
+		
+		// Determine scroll limits
+		let finalTarget = targetPos;
+		
+		// Apply limits if not infinite scrolling
+		if (!this.o.infinite) {
+			finalTarget = Math.max(this.min, Math.min(this.max, targetPos));
+			
+			// Special case for bouncing when scrolling past limits
+			if (targetPos > this.max || targetPos < this.min) {
+				// Apply bouncing effect
+				if (this.o.bouncing) {
+					// Calculate how far past the limit we tried to scroll
+					const overscroll = targetPos - finalTarget;
+					
+					// Use overscroll to determine amount of bounce
+					// The further past the limit, the larger the bounce
+					if (Math.abs(overscroll) > 20) {
+						// Apply bounce effect - go slightly past limit then back
+						const bouncePos = finalTarget + (overscroll * 0.2);
+						
+						// First bounce past limit
+						this.tweenTo(0.2, bouncePos);
+						
+						// Then back to limit
+						setTimeout(() => {
+							if (!this.destroyed) {
+								this.tweenTo(0.5, finalTarget);
+							}
+						}, 150);
+						
+						return;
+					}
+				}
+			}
+		}
+		
+		// Calculate duration based on distance and acceleration
+		// Longer distances and higher acceleration = longer duration
+		const distance = Math.abs(finalTarget - currentPos);
+		let duration = Math.min(2, 0.3 + (distance / (100 + acceleration * 30)) * (1 + acceleration * 0.2));
+		
+		// Ensure minimum duration for small movements
+		duration = Math.max(0.2, duration);
+		
+		// Apply scroll with calculated duration
+		this.tweenTo(duration, finalTarget);
+	}
 } 

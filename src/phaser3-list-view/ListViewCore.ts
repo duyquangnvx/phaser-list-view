@@ -5,7 +5,9 @@ import { Bounds, ListViewOptions, DisplayObject } from './types';
 const defaultOptions: ListViewOptions = {
 	direction: 'y',
 	autocull: true,
-	padding: 10
+	padding: 10,
+	mouseWheel: false,
+	wheelFactor: 0.5
 };
 
 export default class ListViewCore {

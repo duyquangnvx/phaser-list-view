@@ -7,6 +7,8 @@ export interface ListViewOptions {
 	overflow?: number;
 	padding?: number;
 	searchForClicks?: boolean;
+	mouseWheel?: boolean;
+	wheelFactor?: number;
 }
 
 export interface ScrollerOptions {
