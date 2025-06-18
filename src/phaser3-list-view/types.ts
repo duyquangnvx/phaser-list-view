@@ -9,6 +9,19 @@ export interface ListViewOptions {
 	searchForClicks?: boolean;
 	mouseWheel?: boolean;
 	wheelFactor?: number;
+	scrollBar?: boolean;
+	scrollBarColor?: number;
+	scrollBarAlpha?: number;
+	scrollBarThickness?: number;
+	scrollBarBorderRadius?: number;
+}
+
+export interface ScrollBarThumbData {
+	thumbSize: number;
+	trackSize: number;
+	isVertical: boolean;
+	trackX: number;
+	trackY: number;
 }
 
 export interface ScrollerOptions {

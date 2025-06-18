@@ -181,6 +181,10 @@ export default class ListViewCore {
 	removeAll(): void {
 		this.grp.removeAll();
 		this.items = [];
+		this.length = 0;
+		
+		// Emit onAdded event with limit 0 to notify subscribers that content was cleared
+		this.events.onAdded.emit('added', 0);
 	}
 	
 	/**

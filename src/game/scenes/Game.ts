@@ -11,6 +11,8 @@ export class Game extends Scene
     private carouselItems: Phaser.GameObjects.Container[] = [];
     private listViewContainer: Phaser.GameObjects.Container;
     private wheelEnabled: boolean = true;
+    private scrollBarEnabled: boolean = true;
+    private itemCount: number = 15;
     
     constructor ()
     {
@@ -68,12 +70,17 @@ export class Game extends Scene
                 overflow: 140,
                 padding: 10,
                 mouseWheel: true,
-                wheelFactor: 0.1
+                wheelFactor: 0.1,
+                scrollBar: true,
+                scrollBarColor: 0x777777,
+                scrollBarAlpha: 0.8,
+                scrollBarThickness: 10,
+                scrollBarBorderRadius: 5
             }
         );
         
         // Create and add list items
-        this.items = this.createListItems(15);
+        this.items = this.createListItems(this.itemCount);
         this.listView.addMultiple(...this.items);
         
         // Create movement controls
@@ -81,6 +88,12 @@ export class Game extends Scene
         
         // Create a toggle for mouse wheel scrolling
         this.createWheelToggle();
+        
+        // Create a toggle for scrollbar
+        this.createScrollBarToggle();
+        
+        // Create content manipulation controls
+        this.createContentControls();
     }
     
     /**
@@ -157,6 +170,109 @@ export class Game extends Scene
             toggleBtn.fillColor = this.wheelEnabled ? 0x00aa00 : 0xaa0000;
             toggleText.setText(this.wheelEnabled ? 'Wheel: ON' : 'Wheel: OFF');
             this.listView.enableWheel(this.wheelEnabled);
+        });
+    }
+    
+    /**
+     * Create toggle button for scrollbar
+     */
+    createScrollBarToggle() {
+        const toggleBtn = this.add.rectangle(800, 350, 140, 40, this.scrollBarEnabled ? 0x00aa00 : 0xaa0000, 0.8);
+        toggleBtn.setInteractive();
+        
+        const toggleText = this.add.text(800, 350, this.scrollBarEnabled ? 'Scrollbar: ON' : 'Scrollbar: OFF', {
+            fontSize: '16px',
+            color: '#ffffff'
+        }).setOrigin(0.5);
+        
+        toggleBtn.on('pointerdown', () => {
+            this.scrollBarEnabled = !this.scrollBarEnabled;
+            toggleBtn.fillColor = this.scrollBarEnabled ? 0x00aa00 : 0xaa0000;
+            toggleText.setText(this.scrollBarEnabled ? 'Scrollbar: ON' : 'Scrollbar: OFF');
+            this.listView.enableScrollBar(this.scrollBarEnabled);
+        });
+    }
+    
+    /**
+     * Create content manipulation controls
+     */
+    createContentControls(): void {
+        // Add item button
+        const addBtn = this.add.rectangle(650, 400, 80, 40, 0x00aa00, 0.8);
+        addBtn.setInteractive();
+        
+        const addText = this.add.text(650, 400, 'Add Item', {
+            fontSize: '16px',
+            color: '#ffffff'
+        }).setOrigin(0.5);
+        
+        addBtn.on('pointerdown', () => {
+            this.itemCount++;
+            const newItem = this.createListItems(1)[0];
+            this.listView.add(newItem);
+            this.items.push(newItem);
+        });
+        
+        // Add and scroll to item button
+        const addScrollBtn = this.add.rectangle(700, 400, 80, 40, 0x44aa00, 0.8);
+        addScrollBtn.setInteractive();
+        
+        const addScrollText = this.add.text(700, 400, 'Add+Scroll', {
+            fontSize: '14px',
+            color: '#ffffff'
+        }).setOrigin(0.5);
+        
+        addScrollBtn.on('pointerdown', () => {
+            this.itemCount++;
+            const newItem = this.createListItems(1)[0];
+            this.listView.add(newItem, true);
+            this.items.push(newItem);
+        });
+        
+        // Remove item button
+        const removeBtn = this.add.rectangle(800, 400, 80, 40, 0xaa0000, 0.8);
+        removeBtn.setInteractive();
+        
+        const removeText = this.add.text(800, 400, 'Remove', {
+            fontSize: '16px',
+            color: '#ffffff'
+        }).setOrigin(0.5);
+        
+        removeBtn.on('pointerdown', () => {
+            if (this.items.length > 0) {
+                const lastItem = this.items.pop();
+                if (lastItem) {
+                    this.listView.remove(lastItem);
+                    lastItem.destroy();
+                    this.itemCount--;
+                }
+            }
+        });
+        
+        // Reset content button
+        const resetContentBtn = this.add.rectangle(850, 400, 100, 40, 0x0000aa, 0.8);
+        resetContentBtn.setInteractive();
+        
+        const resetContentText = this.add.text(850, 400, 'Reset Items', {
+            fontSize: '16px',
+            color: '#ffffff'
+        }).setOrigin(0.5);
+        
+        resetContentBtn.on('pointerdown', () => {
+            // Remove old items
+            this.items.forEach(item => item.destroy());
+            this.items = [];
+            this.listView.removeAll();
+            
+            // Add new items
+            this.itemCount = 15;
+            this.items = this.createListItems(this.itemCount);
+            
+            // Reset position sau đó thêm các item mới
+            this.listView.reset();
+            
+            // Thêm nội dung vào danh sách 
+            this.listView.addMultiple(...this.items);
         });
     }
     
