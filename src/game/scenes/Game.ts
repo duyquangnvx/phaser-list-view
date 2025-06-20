@@ -470,8 +470,6 @@ export class Game extends Scene
                 fontSize: 24,
                 color: '#ffffff'
             }).setOrigin(0.5);
-
-
             
             // Add elements to the container
             itemContainer.add([bg, border, text]);
