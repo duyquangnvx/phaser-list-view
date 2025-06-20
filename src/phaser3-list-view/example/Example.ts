@@ -1,11 +1,11 @@
 import Phaser from 'phaser';
-import { ListView, ScrollerEventDispatcher } from '../';
+import { ListView, ScrollerEventDispatcher } from '..';
 
 /**
  * Ví dụ về cách sử dụng ScrollerEventDispatcher để xử lý sự kiện
  * cho các item trong ListView
  */
-export default class EventDispatcherExample extends Phaser.Scene {
+export default class Example extends Phaser.Scene {
 	private listView: ListView | null = null;
 	private eventDispatcher: ScrollerEventDispatcher | null = null;
 	private container: Phaser.GameObjects.Container | null = null;
@@ -13,7 +13,7 @@ export default class EventDispatcherExample extends Phaser.Scene {
 	private statusText: Phaser.GameObjects.Text | null = null;
 
 	constructor() {
-		super({ key: 'EventDispatcherExample' });
+		super({ key: 'Example' });
 	}
 
 	preload() {
